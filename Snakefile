@@ -1,9 +1,13 @@
 #
 SAMPLES=['1','2','3','4','5']
+GRAPHS=['hist','dendro','matrix']
 
 rule all:
 	input:
-		expand("{num}.fa.gz.sig", num=SAMPLES)
+		# don't need the expand here anymore since it's in the rule run_sourmash_compare, but it can still stay here
+		expand("{num}.fa.gz.sig", num=SAMPLES),
+		"all.cmp",
+		expand("all.cmp.{type}.png", type=GRAPHS)
 
 rule download_genome_files:
 	output:
@@ -21,8 +25,35 @@ rule download_genome_files:
 
 rule run_sourmash_compute:
 	input:
-		"{num}.fa.gz",
+		"{num}.fa.gz"
 	output:
-		"{num}.fa.gz.sig",
+		"{num}.fa.gz.sig"
 	shell: 
-		"sourmash compute --scaled 1000 -k 31 {input} --name-from-first"
+		"sourmash compute -k 31 {input}"
+
+rule run_sourmash_compare:
+	input:
+		expand("{num}.fa.gz.sig", num=SAMPLES)
+	output:
+		"all.cmp"
+	shell:
+		"sourmash compare {input} -o all.cmp"
+
+rule run_sourmash_plot:
+	input:
+		"all.cmp",
+		"all.cmp.labels.txt"
+	output:
+		"all.cmp.hist.png",
+		"all.cmp.dendro.png",
+		"all.cmp.matrix.png"
+	shell:
+		"sourmash plot --labels all.cmp"
+
+
+
+
+
+
+
+
