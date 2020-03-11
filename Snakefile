@@ -35,7 +35,8 @@ rule run_sourmash_compare:
 	input:
 		expand("{num}.fa.gz.sig", num=SAMPLES)
 	output:
-		"all.cmp"
+		"all.cmp",
+		"all.cmp.labels.txt"
 	shell:
 		"sourmash compare {input} -o all.cmp"
 
